@@ -1,0 +1,361 @@
+mongoimport -d baza -c products < products.json
+mongo baza lub 
+mongo 
+use baza
+//pokazuje podstawowe komendy 
+help
+//komendy bazy
+db.help()
+//komendy kolekcji
+db.products.help()
+//podaj nazwę bazy
+db.getName()
+//podaj nazwy baz i miejsce zajęte na dysku
+show dbs
+//wypisz kolekcje dokumentów w danej bazie
+db.getCollectionNames()
+show collections
+//wypisz wszystkie niesformatowane
+db.products.find()
+//wypisz wszystkie sformatowane
+db.products.find().pretty()
+//wypisz jeden przykładowy pierwszy od góry sformatowany
+db.products.findOne()
+//wypisz produkty z brand ACME
+db.products.find({brand:"ACME"}).pretty()
+//wypisz pierwszy od góry produkt z brand ACME
+db.products.findOne({brand:"ACME"})
+//wypisz produkty z brand ACME i dostępne
+db.products.find({brand:"ACME", available:true}).pretty()
+//wypisz produkty z brand ACME i ceną większą od 210
+db.products.find({brand:"ACME", price:{$gt : 210}}).pretty()
+//wypisz produkty z brand ACME i ceną większą od 210 i mniejszą od 400
+db.products.find({brand:"ACME", price: {$gt : 210, $lt: 400} }).pretty()
+//wypisz tylko nazwy brand z identyfikatorami wierszy _id
+db.products.find({},{brand:1})
+//wypisz tylko nazwy brand bez identyfikatorów wierszy _id
+db.products.find({},{brand:1,_id:0})
+//wypisz tylko ceny bez identyfikatorów wierszy _id
+db.products.find({},{price:1,_id:0})
+//wypisz tylko nazwy bez identyfikatorów wierszy _id
+db.products.find({},{name:1,_id:0})
+//wypisz z produktów ceny i nazwy z literą A na początku oraz jednocześnie ceną większą od stu 
+db.products.find({name:/^A/, price:{$gt : 100}},{name:1,price:1,_id:0})
+//wypisz z produktów ceny i nazwy z literą P gdziekolwiek w tekście oraz jednocześnie ceną większą od stu 
+db.products.find({name:/P/, price:{$gt : 100}},{name:1,price:1,_id:0})
+//wypisz z produktów nazwy z literą d na końcu
+db.products.find({name:/d$/},{name:1,_id:0})
+//wypisz z produktów nazwy z literą A na początku, z literą n na końcu, pośrodku dowolne znaki
+db.products.find({name:/^A.*n$/},{name:1,_id:0})
+//wypisz z produktów nazwy z literą A na początku, z literą n na końcu, pośrodku znaki z podanych zakresów i spacja
+db.products.find({name:/^A[A-Za-z0-9 ]*n$/},{name:1,_id:0})
+//wypisuje produkty z cenami jak i bez cen (puste)
+db.products.find({},{price:1,_id:0})
+//wypisuje tylko obiekty z cenami (istniejącą parą cena:liczba)
+db.products.find({price: {$exists: true}},{price:1,_id:0})
+//wypisz z produktów nazwy o typie tekstowym, gdyż można wstawić dowolny typ nawet liczbę
+db.products.find({name: {$type: 2} },{name:1,_id:0})
+//wypisz produkty z nazwami zaczynającymi się na A lub kończącymi się na n
+db.products.find({$or:[{name:/n$/}, {name:/^A/}]},{name:1,_id:0})
+//wypisz produkty z nazwami zaczynającymi się na A i kończącymi się na n
+db.products.find({$and:[{name:/n$/}, {name:/^A/}]},{name:1,_id:0})
+//wypisz z produktów typu słowa kluczowe
+db.products.find({},{type:1,_id:0})
+//wypisz produkty z słowem kluczowym typu phone
+db.products.find({type: {$in: ["phone"]}},{type:1,_id:0})
+//wypisz produkty ze słowami kluczowymi typu accessory i case
+db.products.find({type: {$in: ["accessory", "case"]}},{type:1,_id:0})
+db.products.find({type: {$all: ["accessory", "case"]}},{type:1,_id:0})
+//dodaj do produktów z typem accessory nowe typy phone i cable
+db.products.update({type: {$all: ["accessory"]}}, {$addToSet: {type: {$each: ["phone", "cable"]}}}, false, true)
+//explain z parametrem "executionStats" podaje statystyki czas wykonania, ilość pobranych wierszy
+db.products.find({type: {$all: ["accessory", "case"]}},{price:1, name:1, _id:0}).explain("executionStats")
+//explain z parametrem "queryPlanner" lub 0 podaje plan zapytania
+db.products.find({type: {$all: ["accessory", "case"]}},{price:1, name:1, _id:0}).explain("queryPlanner")
+db.products.find({type: {$all: ["accessory", "case"]}},{price:1, name:1, _id:0}).explain(0)
+//explain z parametrem "allPlansExecution" lub 1 podaje plan zapytania oraz statystyki
+db.products.find({type: {$all: ["accessory", "case"]}},{price:1, name:1, _id:0}).explain("allPlansExecution")
+db.products.find({type: {$all: ["accessory", "case"]}},{price:1, name:1, _id:0}).explain(1)
+//załóż indeks na kolumnie (rozumianej jako parze klucz:wartość) type
+db.products.ensureIndex({type:1})
+//usunięcie indeksu
+db.products.dropIndex({type:1})
+//wypisz indeksy w dokumencie products
+db.products.getIndexes()
+//wypisz indeksy systemowe
+db.system.indexes.find()
+//buduj indeksy od nowa
+db.products.reIndex()
+//statystyki dokumentu (tabeli) products
+db.products.stats()
+//statystyki danej bazy danych
+db.stats()
+//sortuj po nazwach w porządku rosnącym
+db.products.find({},{name:1, _id:0}).sort({name:1})
+//sortuj po nazwach w porządku malejącym
+db.products.find({},{name:1, _id:0}).sort({name:-1})
+//sortuj po nazwach w porządku malejącym i wypisz jeden od góry
+db.products.find({},{name:1, _id:0}).sort({name:-1}).limit(1)
+
+mongoimport -d baza -c zips < zips.json
+mongo baza
+//policz poczty
+db.zips.count()
+//pogrupuj po nazwie miasta i policz liczności grup sumując jedynki dopisane do każdego wiersza
+db.zips.aggregate([{ $group : { _id : "$city", citycount : {$sum:1} } }])
+//pogrupuj po nazwie miasta i policz liczności grup, sortuj w porządku malejącym
+db.zips.aggregate([{ $group : { _id : "$city", citycount : {$sum:1} } },{$sort: {citycount:-1}}])
+//pogrupuj po pierwszej literze nazwy miasta, policz i posortuj w porządku malejącym
+db.zips.aggregate([{$project: {litera : {$substr: ["$city",0,1]}}}, {$group: {_id: "$litera", lettercount: {$sum:1}}}, {$sort: {lettercount:-1}}])
+//podaj liczności na stan (jako region)
+db.zips.aggregate([ {$group: {_id:"$state", n: {$sum:1}}} ])
+//podaj liczności na stan (jako region) posortowane według skrótów
+db.zips.aggregate([ {$group: {_id:"$state", n: {$sum:"$pop"}}}, {$sort: {_id:1}} ])
+//podaj liczbę ludności na stan (jako region)
+db.zips.aggregate([ {$group: {_id:"$state", n: {$sum:"$pop"}}} ])
+//wybierz stan o najmniejszej liczebności
+db.zips.aggregate([ {$group: {_id:"$state", n: {$sum:"$pop"}}},{$group: {_id:0,total:{$min:"$n"}}} ])
+db.zips.aggregate([ {$group: {_id:"$state", n: {$sum:"$pop"}}},{$sort: {n:1}},{$limit:1} ])
+//wybierz stan o największej liczebności
+db.zips.aggregate([ {$group: {_id:"$state", n: {$sum:"$pop"}}},{$group: {_id:0,total:{$max:"$n"}}} ])
+db.zips.aggregate([ {$group: {_id:"$state", n: {$sum:"$pop"}}},{$sort: {n:-1}},{$limit:1} ])
+//średnia liczebności stanów
+db.zips.aggregate([ {$group: {_id:"$state", n: {$sum:"$pop"}}},{$group: {_id:0,total:{$avg:"$n"}}} ])
+//suma ludności we wszystkich stanach
+db.zips.aggregate([ {$group: {_id:"$state", n: {$sum:"$pop"}}},{$group: {_id:0,total:{$sum:"$n"}}} ])
+//liczebność sumaryczna stanów zaczynających się na A
+db.zips.aggregate([ {$match: {state:/^A/}},{$group: {_id:"$state", n: {$sum:"$pop"}}},{$group: {_id:0,total:{$sum:"$n"}}} ])
+//liczebność sumaryczna stanów CA i WY
+db.zips.aggregate([ {$match: {state:{$in:["CA","WY"]}}},{$group: {_id:"$state", n: {$sum:"$pop"}}},{$group: {_id:0,total:{$sum:"$n"}}} ])
+//populacja miast ze stanów CA i NY z populacją większą od 25tys.
+db.zips.aggregate([
+  { "$match" : { state : { $in : ["CA", "NY"]},  } },
+  { $group : { _id : { city : "$city", state: "$state"}, totalPop : {$sum : "$pop"} } },
+  { "$match" : { "totalPop" : { "$gt" : 25000 } } },
+  { "$group" : { _id : 0, avgPop : { $avg : "$totalPop"} } }
+ ])
+
+//explain w wersji na runCommand aggregate 
+db.zips.runCommand("aggregate", {pipeline: [tu wklejasz zawartość aggregate],explain:true})
+db.zips.runCommand("aggregate", {pipeline: [],explain:true})
+//explain w wersji na aggregate
+db.zips.aggregate([ {$match: {state:{$in:["CA","WY"]}}},{$group: {_id:"$state", n: {$sum:"$pop"}}},{$group: {_id:0,total:{$sum:"$n"}}} ], {explain:true})
+//wypisz po największym i najmniejszym mieście na każdy stan
+db.zips.aggregate({$group: {_id: {state: "$state", city: "$city"}, pop: {$sum: "$pop"}}}, {$sort: {pop: 1}}, {$group: {_id: "$_id.state", biggestCity: {$last: "$_id.city"}, biggestPop:  {$last: "$pop"}, smallestCity: {$first: "$_id.city"}, smallestPop: {$first: "$pop"}}}, {$project: {_id: 0, state: "$_id", biggestCity:  {name: "$biggestCity", pop: "$biggestPop"}, smallestCity: {name: "$smallestCity", pop: "$smallestPop"}}}, {$sort:{"smallestCity.name":1}})
+//wypisz po największym i najmniejszym mieście na każdy stan do kolekcji stany
+db.zips.aggregate( { $group: { _id: { state: "$state", city: "$city" }, pop: { $sum: "$pop" } } }, { $sort: { pop: 1 } }, { $group: { _id : "$_id.state", biggestCity:  { $last: "$_id.city" }, biggestPop:   { $last: "$pop" }, smallestCity: { $first: "$_id.city" }, smallestPop:  { $first: "$pop" } } }, { $project: { _id: 0, state: "$_id", biggestCity:  { name: "$biggestCity",  pop: "$biggestPop" }, smallestCity: { name: "$smallestCity", pop: "$smallestPop" } } }, {$sort:{"smallestCity.name":1}}).forEach(function(o){db.stany.insert(o)})
+db.stany.find({},{_id:0})
+//podaj miasta bliższe Pittsburgowi niż Philadelfii i odwrotnie
+reduce = function(key, values) {
+  var count = 0;
+
+  values.forEach(function(v) {
+    count += v['count'];
+  });
+
+  return {count: count};
+}
+function map_closest() {
+    var pitt = [-80.064879, 40.612044];
+    var phil = [-74.978052, 40.089738];
+
+    function distance(a, b) {
+        var dx = a[0] - b[0];
+        var dy = a[1] - b[1];
+        return Math.sqrt(dx * dx + dy * dy);
+    }
+
+    if (distance(this.loc, pitt) < distance(this.loc, phil)) {
+        emit({city: this.city, aim: "pitt"},{count:1});
+    } else {
+        emit({city: this.city, aim: "phil"},{count:1});
+    }
+}
+function map2(){
+  emit(this['_id']['aim'],{count:1});
+}
+db.zips.mapReduce(map_closest, reduce, {out: "outcity"})
+db.outcity.mapReduce(map2, reduce, {out: {inline:1}})
+
+
+
+mongoimport -d baza -c students < students.js
+mongo baza
+db.students.count()
+db.students.findOne()
+db.students.find({_id:0})
+//wypisać punktacje studentów z pracą domową
+db.students.find( {"scores.type" : "homework"}, {"scores.type":1, "scores.score":1}).sort({_id:1, "scores.type": -1});
+//dla każdego studenta podaj najwyższą puktacje za pracę domową
+db.students.aggregate([{$unwind: "$scores"},{$match: {"scores.type":"homework"}},{$project: {typ:"$scores.type",num:"$scores.score"}},{$group: {_id:"$_id",max:{$max: "$num"}}},{$sort: {_id:1}}])
+//wypisz każdą pracę domową w jednej linii (prac domowych może być kilka np. 2)
+db.students.aggregate({$unwind: "$scores"},{$match: {"scores.type":"homework"}},{$project: {typ:"$scores.type",num:"$scores.score"}})
+//wypisz posortowane średnie z prac domowych na studenta
+db.students.aggregate([{$unwind: "$scores"},{$match: {"scores.type":"homework"}},{$project: {typ:"$scores.type",num:"$scores.score"}},{$group: {_id:"$_id",avg:{$avg: "$num"}}},{$sort: {avg:1}}])
+//wypisz posortowane średnie z prac domowych na studenta w krótszej formie
+db.students.aggregate([{$unwind: "$scores"},{$match: {"scores.type":"homework"}},{$group: {_id:"$_id",avg:{$avg: "$scores.score"}}},{$sort: {avg:1}}])
+//usuwam element dokument homework z tablicy scores, dla wszystkich wierszy (ostatnie true dla multi)
+db.students.update({},{$pop: {scores: {type:"homework"}}}, false, true)
+//usunięcie wszystkich prac domowych z punktacji
+db.students.update({}, {$pull: {scores:  {type: "homework"}}  }, false, true);
+//usuwam z tablicy elementy pasujące do warunku
+db.students.update({}, {$pull: {scores:  {type: "homework"}}  }, false, true);
+//usuwam bazę
+db.students.drop()
+//zostawiam tylko prace domowe z większą ilością punktów z 2 zostaje jedna
+smax=db.students.aggregate({$unwind: "$scores"},{$match: {"scores.type":"homework"}},{$group: {_id:"$_id",max:{$max: "$scores.score"}}},{$sort: {_id:1}});null;
+db.students.update({}, {$pull: {scores:  {type: "homework"}}  }, false, true);
+//db.students.update({},{$pop: {scores: {type:"homework"}}}, false, true)
+//smax.forEach(function(o){db.studentsmaxhomework.insert(o)})
+smax.forEach(function(o){db.students.update({_id:o._id},{$push: {"scores": {type:"homework" ,score: o.max}}},false,true)})
+//smax.forEach(function(o){db.students.update({_id:o._id},{$addToSet: {"scores": {type:"homework" ,score: o.max}}},false,true)})
+//wykasuj punkty każdemu ze studentów podmieniając tabelę wyników z pomocą $set na zbiór pusty
+db.students.update({},{ "$set": {"scores": []}},false,true)
+//wykasuj punkty każdemu ze studentów usuwając tabelę wyników
+db.students.update({},{$unset: {"scores": 1}},false,true)
+//updatuj konkretny element tablicy z $set i tablica.$
+db.students.update({"_id" : 0, "scores.type" : "homework"},  {"$set": {"scores.$" : {"type" : "homework", "score" : 20.00}}});
+//sformatowany update zamieszczony powyżej
+db.students.update(
+  {
+    "_id" : 0,
+    "scores.type" : "homework"
+  },
+  {
+    "$set" :
+    {
+        "scores.$" : {
+          "type" : "homework",
+          "score" : 20.00
+        }
+    }
+  }
+);
+//znajdź studentów z pracą domową powyżej 98 procent
+db.students.find(
+   { scores: { $elemMatch: { type: "homework", score: { $gte: 98 } } } }
+)
+//znajdź studentów z pracą domową pomiędzy 98, a 99 procent
+db.students.find(
+   { scores: { $elemMatch: { type: "homework", score: {$gte: 98, $lt: 99} } } }
+)
+
+//znajdź studentów z pracą domową w dwóch wersjach
+db.students.find({ scores: { $elemMatch: { type: "homework" } } })
+db.students.find({ "scores.type": "homework" })
+
+
+//wczytanie nowego zbioru testowego
+mongorestore --drop --db enron dump/enron
+//struktura dokumentu
+{
+    "_id" : ObjectId("4f16fc97d1e2d32371003f02"),
+    "body" : "COURTYARD....",
+    "filename" : "2.",
+    "headers" : {
+        "Content-Transfer-Encoding" : "7bit",
+        "Content-Type" : "text/plain; charset=us-ascii",
+        "Date" : ISODate("2001-07-30T22:19:40Z"),
+        "From" : "reservations@marriott.com",
+        "Message-ID" : "<32788362.1075840323896.JavaMail.evans@thyme>",
+        "Mime-Version" : "1.0",
+        "Subject" : "84029698 Marriott  Reservation Confirmation Number",
+        "To" : [
+            "ebass@enron.com"
+        ],
+        "X-FileName" : "eric bass 6-25-02.PST",
+        "X-Folder" : "\ExMerge - Bass, Eric\Personal",
+        "X-From" : "Reservations@Marriott.com",
+        "X-Origin" : "BASS-E",
+        "X-To" : "EBASS@ENRON.COM",
+        "X-bcc" : "",
+        "X-cc" : ""
+    },
+    "mailbox" : "bass-e",
+    "subFolder" : "personal"
+}
+//policz emaile od andrew.fastow do jeff.skilling
+db.messages.find ( { "headers.From":"andrew.fastow@enron.com", "headers.To":"jeff.skilling@enron.com" }).count()
+//policz listy od osoby do osoby i posortuj w porządku malejącym
+db.messages.aggregate ([
+       {"$unwind":"$headers.To"},
+       {"$group":{"_id": {"From":"$headers.From", "To":"$headers.To"}, "count": {$sum:1}}},
+       {$sort:{"count": -1}}
+])
+//to co wyżej, ale pierwszy wiersz od góry 
+db.messages.aggregate ([
+       {"$unwind":"$headers.To"},
+       {"$group":{"_id": {"From":"$headers.From", "To":"$headers.To"}, "count": {$sum:1}}},
+       {$sort:{"count": -1}},
+       {$limit: 1}
+])
+//to co wyżej, ale drugi wiersz od góry 
+db.messages.aggregate ([
+       {"$unwind":"$headers.To"},
+       {"$group":{"_id": {"From":"$headers.From", "To":"$headers.To"}, "count": {$sum:1}}},
+       {$sort:{"count": -1}},
+       {$skip:1},
+       {$limit: 1}
+])
+//rozmiar kolekcji (tabeli) messages
+db.messages.totalSize()
+//rozmiar indeksów kolekcji
+db.messages.totalIndexSize()
+//podaj indeksy kolekcji
+db.messages.getIndexes()
+
+//import danych
+mongoimport -d baza -c images < images.json
+mongo baza
+//policz images
+db.images.aggregate({"$group":{"_id":0, "sum_id":{"$sum":1}}})
+db.images.count()
+//dodaj do siebie wszystkie wartości id obrazów
+db.images.aggregate({"$group":{"_id":0, "sum_id":{"$sum":"$_id"}}})
+//drugi sposób map reduce
+function map() {
+    emit('_id', this._id);
+}
+function reduce(key, values) {
+    var result = 0;
+    if (key === '_id') {
+        for(var i = 0; i < values.length; i++)
+        {
+            result += values[i];
+        }
+    }
+    return result;
+}
+db.images.mapReduce(map, reduce, {out: {inline: 1}});
+
+//import danych
+mongoimport -d baza -c albums < albums.json
+//usuń te obrazki, które pojawiają się w albumach
+function filter(image) {
+    if (db.albums.count({'images': image._id}) == 1)
+    {
+        db.images.remove({'_id': image._id});
+    }
+}
+db.images.find().forEach(filter);
+//posumuj indentyfikatory i policz obrazki w albumach
+db.albums.aggregate( 
+{ $unwind : "$images" }, 
+{ $group: { _id : null, sum : {$sum : "$images"}, count : {$sum : 1}}})
+
+//import danych
+mongoimport -d baza -c grades < grades.json 
+//podaj 10 najwyższych średnich na klasę bez quizów
+db.grades.aggregate([{$unwind:"$scores"},{$match:{"scores.type":{"$ne":"quiz"}}},{$group:{_id:{class_id:"$class_id",student_id:"$student_id"},"average":{$avg:"$scores.score"}}},{$group:{_id:"$_id.class_id","average":{$avg:"$average"}}},{$sort:{average:-1}},{$limit:10}])
+
+//dane o serwerze mongod
+db.serverStatus({workingSet:1})
+//maksymalny rozmiar bson obiektu
+db.isMaster().maxBsonObjectSize
+
+//wczytaj dane
+mongoimport -d baza -c posts < posts.json
+mongo baza
+//policz komentarze autorów i wypisz 10 najwyższych wyników w porządku malejącym
+db.posts.aggregate([{$unwind:"$comments"},{$group:{"_id":"$comments.author","count":{$sum:1}}},{$sort:{"count":-1}},{$limit:10}])
+

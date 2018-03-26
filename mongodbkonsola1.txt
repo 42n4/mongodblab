@@ -1,0 +1,61 @@
+﻿//mongo z wykładu
+for(i=1; i<10000; i++) {db.nowabaza.save({a: i%9, towar: 'bułka', ilosc:20+i%99})}
+
+db.nowabaza.ensureIndex({a:1});
+db.nowabaza.ensureIndex({ilosc:1,a:1});
+db.nowabaza.update({towar: "bułka"},{$set:{towar:"grahamka"}},false,true) 
+db.nowabaza.find({a: {$exists: true}})
+
+//nie działa 
+//db.nowabaza.aggregate({{$group: {_id:null, count: {$sum: 1}}}})
+
+
+//PROSTY MAP_REDUCE
+// map function 
+m = function(){ 
+             emit( this.a , { count : 1 } );  
+ }; 
+
+// reduce function 
+r = function( key , values ){ 
+     var total = 0; 
+     for ( var i=0; i<values.length; i++ ) 
+         total += values[i].count; 
+     return { count : total }; 
+ }; 
+
+res = db.nowabaza.mapReduce(m, r, { out : "myoutput" } ); 
+db.myoutput.find() 
+db.myoutput.drop()
+
+
+
+
+//GRUPOWANIE
+
+db.nowabaza.group(
+{
+ key: {'a':true},
+ initial: {sum:0},
+ reduce: function(doc,prev){prev.sum+=1},
+ cond: {a: {$gt: 5}},
+ finalize: function(doc){doc.sum=doc.sum/2}
+}
+);
+
+var finalizer=function(doc){doc.sum=doc.sum/2}
+db.nowabaza.group(
+{
+ key: {'a':true},
+ initial: {sum:0},
+ reduce: function(doc,prev){prev.sum+=1},
+ cond: {a: {$gt: 5}},
+ finalize: finalizer
+}
+);
+
+
+
+
+
+

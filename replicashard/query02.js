@@ -1,0 +1,2 @@
+db.messages.find().count()
+
